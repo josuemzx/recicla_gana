@@ -1,12 +1,18 @@
+# Dockerfile completo
 FROM php:8.2-apache
 
-# Instala PDO y el driver de PostgreSQL
-RUN docker-php-ext-install pdo pdo_pgsql
+# 1) Actualiza e instala los headers de libpq (PostgreSQL)
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends libpq-dev \
+ && rm -rf /var/lib/apt/lists/*
 
-# Habilita mod_rewrite y headers en Apache
+# 2) Compila e instala PDO_PGSQL (usa los headers que acabas de instalar)
+RUN docker-php-ext-install pdo_pgsql
+
+# 3) Habilita mod_rewrite y headers en Apache
 RUN a2enmod rewrite headers
 
-# Copia todo el contenido de public/ a la carpeta raíz de Apache
+# 4) Copia tu carpeta public/ a la raíz de Apache
 COPY public/ /var/www/html/
 
 WORKDIR /var/www/html

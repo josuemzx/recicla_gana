@@ -5,22 +5,19 @@ Listado de archivos (sin .git ni este .bat)
 ================================
 File: C:\Users\ASUS\Documents\GitHub\recicla_gana\Dockerfile
 -------------------------------
-# Dockerfile
 FROM php:8.2-apache
 
-# 1) Instala PDO y el driver MySQL
-RUN docker-php-ext-install pdo pdo_mysql
+# Instala PDO y el driver de PostgreSQL
+RUN docker-php-ext-install pdo pdo_pgsql
 
-# 2) Habilita mod_rewrite y headers en Apache
+# Habilita mod_rewrite y headers en Apache
 RUN a2enmod rewrite headers
 
-# 3) Copia todo el contenido de public/ a la carpeta raíz de Apache
+# Copia todo el contenido de public/ a la carpeta raíz de Apache
 COPY public/ /var/www/html/
 
-# 4) Sitúa el WORKDIR donde están los .php
 WORKDIR /var/www/html
 
-# 5) Expón el puerto 80 y arranca Apache
 EXPOSE 80
 CMD ["apache2-foreground"]
 
@@ -34,22 +31,19 @@ Listado de archivos (sin .git ni este .bat)
 ================================
 File: C:\Users\ASUS\Documents\GitHub\recicla_gana\Dockerfile
 -------------------------------
-# Dockerfile
 FROM php:8.2-apache
 
-# 1) Instala PDO y el driver MySQL
-RUN docker-php-ext-install pdo pdo_mysql
+# Instala PDO y el driver de PostgreSQL
+RUN docker-php-ext-install pdo pdo_pgsql
 
-# 2) Habilita mod_rewrite y headers en Apache
+# Habilita mod_rewrite y headers en Apache
 RUN a2enmod rewrite headers
 
-# 3) Copia todo el contenido de public/ a la carpeta raíz de Apache
+# Copia todo el contenido de public/ a la carpeta raíz de Apache
 COPY public/ /var/www/html/
 
-# 4) Sitúa el WORKDIR donde están los .php
 WORKDIR /var/www/html
 
-# 5) Expón el puerto 80 y arranca Apache
 EXPOSE 80
 CMD ["apache2-foreground"]
 
@@ -61,11 +55,15 @@ Listado de archivos (sin .git ni este .bat)
 ================================
 
 ================================
-File: C:\Users\ASUS\Documents\GitHub\recicla_gana\Dockerfil
+File: C:\Users\ASUS\Documents\GitHub\recicla_gana\Dockerfile
+-------------------------------
+FROM php:8.2-apache
+
+# Instala PDO y el driver de PostgreSQL
+RUN 
 ================================
 File: C:\Users\ASUS\Documents\GitHub\recicla_gana\render.yaml
 -------------------------------
-# render.yaml
 services:
   - type: web
     name: recicla-gana
@@ -98,9 +96,9 @@ services:
 ================================
 File: C:\Users\ASUS\Documents\GitHub\recicla_gana\schema.sql
 -------------------------------
-CREATE TABLE IF NOT EXISTS scores(
-  name VARCHAR(60) PRIMARY KEY,
-  bottles INT DEFAULT 0
+CREATE TABLE IF NOT EXISTS scores (
+  name    TEXT    PRIMARY KEY,
+  bottles INTEGER DEFAULT 0
 );
 .
 ================================
@@ -113,163 +111,11 @@ File: C:\Users\ASUS\Documents\GitHub\recicla_gana\public\index.html
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Ranking – Recicla & Gana</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet" />
-    <style>
-         :root {
-            --c1: #00e676;
-            --c2: #00b0ff;
-            --c3: #ffc400;
-            --bg: #141e30;
-            --bg2: #243b55;
-        }
-        
-        *,
-        html,
-        body {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Montserrat', sans-serif;
-            color: #fff;
-        }
-        
-        body {
-            background: linear-gradient(135deg, var(--bg), var(--bg2));
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px 12px;
-            overflow-x: hidden;
-        }
-        
-        h1 {
-            font-weight: 900;
-            font-size: 3rem;
-            margin: 0 0 20px;
-            text-align: center;
-            background: linear-gradient(90deg, var(--c1), var(--c2));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, .5));
-        }
-        
-        .glass {
-            background: rgba(255, 255, 255, .08);
-            border-radius: 22px;
-            padding: 28px;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, .4);
-            width: 100%;
-            max-width: 1000px;
-            margin-bottom: 20px;
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 1rem;
-        }
-        
-        th,
-        td {
-            padding: 14px 12px;
-            text-align: left;
-        }
-        
-        thead th {
-            background: rgba(255, 255, 255, .15);
-            font-weight: 700;
-            letter-spacing: .5px;
-            color: #ffea00;
-        }
-        
-        tbody tr:nth-child(odd) {
-            background: rgba(0, 0, 0, .05);
-        }
-        
-        tbody tr:hover {
-            background: rgba(255, 255, 255, .05);
-        }
-        
-        .trophy {
-            font-size: 1.5rem;
-            filter: drop-shadow(0 0 4px rgba(255, 255, 255, .6));
-        }
-        
-        tbody tr:nth-child(-n+3)::after {
-            content: "";
-            position: absolute;
-            inset: 0;
-            border-radius: 8px;
-            background: linear-gradient(45deg, var(--c1), var(--c2), var(--c3));
-            opacity: .35;
-            z-index: -1;
-            filter: blur(15px);
-        }
-        
-        .badge {
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: .8rem;
-            font-weight: 700;
-            background: var(--c1);
-            color: #003c26;
-        }
-        
-        .rewards-list {
-            background: rgba(255, 255, 255, .08);
-            border-radius: 22px;
-            padding: 28px;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, .4);
-            width: 100%;
-            max-width: 1000px;
-        }
-        
-        .rewards-list h2 {
-            margin: 0;
-            color: var(--c1);
-            text-align: center;
-            font-size: 1.5rem;
-        }
-        
-        .rewards-list table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 16px;
-            font-size: .95rem;
-        }
-        
-        .rewards-list th,
-        .rewards-list td {
-            padding: 10px;
-            border-bottom: 1px solid rgba(255, 255, 255, .12);
-            color: #eee;
-            text-align: left;
-        }
-        
-        .rewards-list th {
-            background: rgba(255, 255, 255, .15);
-            color: var(--c3);
-            font-weight: 700;
-        }
-        
-        footer {
-            margin-top: 10px;
-            font-size: .85rem;
-            color: #ccc;
-            text-align: center;
-            opacity: .6;
-        }
-    </style>
+    <!-- estilos omitidos para brevedad; copia los tuyos tal cual -->
 </head>
 
 <body>
     <h1>🏆 Ranking Recicla & Gana</h1>
-
     <div class="glass">
         <table id="board">
             <thead>
@@ -283,91 +129,35 @@ File: C:\Users\ASUS\Documents\GitHub\recicla_gana\public\index.html
             <tbody></tbody>
         </table>
     </div>
-
-    <div class="rewards-list">
-        <h2>📋 Detalle de Recompensas</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Botellas</th>
-                    <th>Recompensa</th>
-                </tr>
-            </thead>
-            <tbody id="rewards-body"></tbody>
-        </table>
-    </div>
-
-    <footer>Actualizado cada 15&nbsp;s</footer>
-
+    <!-- tabla de recompensas igual a como la tenías -->
     <script>
         const API_BASE = 'api/';
-        const REWARD_TIERS = [{
-            b: 10,
-            prize: '1 rollo de papel higiénico'
-        }, {
-            b: 20,
-            prize: '1 paquete de galletas'
-        }, {
-            b: 30,
-            prize: '1 litro de leche o jugo'
-        }, {
-            b: 40,
-            prize: '1 detergente pequeño'
-        }, {
-            b: 50,
-            prize: '1 kg de arroz o azúcar'
-        }, {
-            b: 60,
-            prize: '1 frasco de limpiador multiusos'
-        }, {
-            b: 70,
-            prize: '1 paquete de esponjas'
-        }, {
-            b: 80,
-            prize: '1 litro de aceite'
-        }, {
-            b: 90,
-            prize: '1 producto de higiene personal'
-        }, {
-            b: 100,
-            prize: '1 caja sorpresa'
-        }];
+        const REWARD_TIERS = [ /* ... */ ]; // igual que antes
         const trophies = ['🥇', '🥈', '🥉'];
 
         function rewardsCount(b) {
             return REWARD_TIERS.filter(t => b >= t.b).length;
         }
         async function load() {
-            try {
-                const res = await fetch(API_BASE + 'board.php');
-                const list = await res.json();
-                const tb = document.querySelector('#board tbody');
-                tb.innerHTML = '';
-                list.forEach((r, i) => {
-                    const tr = document.createElement('tr');
-                    const place = trophies[i] || `<span class="badge">${i+1}</span>`;
-                    tr.innerHTML = `
-            <td class="trophy">${place}</td>
-            <td>${r.name}</td>
-            <td>${r.bottles}</td>
-            <td>${rewardsCount(r.bottles)}</td>
-          `;
-                    tb.appendChild(tr);
-                });
-            } catch (e) {
-                console.error(e);
-            }
+            const res = await fetch(API_BASE + 'board.php');
+            const list = await res.json();
+            const tb = document.querySelector('#board tbody');
+            tb.innerHTML = '';
+            list.forEach((r, i) => {
+                const tr = document.createElement('tr');
+                const place = trophies[i] || `<span class="badge">${i+1}</span>`;
+                tr.innerHTML = `
+          <td class="trophy">${place}</td>
+          <td>${r.name}</td>
+          <td>${r.bottles}</td>
+          <td>${rewardsCount(r.bottles)}</td>
+        `;
+                tb.appendChild(tr);
+            });
         }
         load();
         setInterval(load, 15000);
-
-        // rellenar recompensa cuerpo
-        const rb = document.getElementById('rewards-body');
-        REWARD_TIERS.forEach(r => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `<td>${r.b}</td><td>${r.prize}</td>`;
-            rb.appendChild(tr);
-        });
+        // rellena detalle de recompensas...
     </script>
 </body>
 
@@ -382,193 +172,14 @@ File: C:\Users\ASUS\Documents\GitHub\recicla_gana\public\index_admin.html
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Recicla & Gana – Admin</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet" />
-    <style>
-         :root {
-            --c1: #00e676;
-            --c2: #00b0ff;
-            --c3: #ffc400;
-            --bg: #0f2027;
-            --bg2: #203a43;
-            --bg3: #2c5364;
-        }
-        
-        *,
-        html,
-        body {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Montserrat', sans-serif;
-            color: #fff;
-        }
-        
-        body {
-            background: linear-gradient(135deg, var(--bg), var(--bg2), var(--bg3));
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-            overflow-x: hidden;
-        }
-        
-        h1 {
-            font-weight: 900;
-            font-size: 3rem;
-            margin: 10px 0 25px;
-            background: linear-gradient(90deg, var(--c1), var(--c2));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, .5));
-        }
-        
-        .flex {
-            display: flex;
-            gap: 40px;
-            flex-wrap: wrap;
-            width: 100%;
-            max-width: 1200px;
-        }
-        
-        .glass {
-            background: rgba(255, 255, 255, 0.08);
-            border-radius: 22px;
-            padding: 28px;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, .4);
-        }
-        
-        label {
-            display: block;
-            margin: 14px 0 8px;
-            font-weight: 700;
-            font-size: .9rem;
-            color: #cfd8dc;
-        }
-        
-        input,
-        select,
-        button {
-            width: 100%;
-            padding: 14px;
-            border: none;
-            border-radius: 12px;
-            font-size: 1rem;
-        }
-        
-        input,
-        select {
-            background: rgba(255, 255, 255, .15);
-            color: #000;
-        }
-        
-        select option {
-            background: #fff;
-            color: #000;
-        }
-        
-        input::placeholder {
-            color: #b0bec5;
-        }
-        
-        button {
-            margin-top: 20px;
-            font-weight: 700;
-            background: linear-gradient(90deg, var(--c1), var(--c2));
-            color: #003c26;
-            cursor: pointer;
-            transition: transform .2s;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        button:hover {
-            transform: translateY(-2px);
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-            font-size: .9rem;
-        }
-        
-        th,
-        td {
-            padding: 12px 10px;
-            border-bottom: 1px solid rgba(255, 255, 255, .12);
-        }
-        
-        th {
-            color: #ffeb3b;
-            text-shadow: 0 0 4px rgba(255, 235, 59, .6);
-        }
-        
-        tbody tr:nth-child(odd) {
-            background: rgba(0, 0, 0, .05);
-        }
-        
-        tbody tr:hover {
-            background: rgba(255, 255, 255, .05);
-        }
-        
-        .trophy {
-            font-size: 1.4rem;
-        }
-        
-        .del-btn {
-            background: none;
-            border: none;
-            color: #ef5350;
-            font-size: 1.3rem;
-            cursor: pointer;
-        }
-        
-        #msg {
-            margin-top: 16px;
-            font-weight: 700;
-            color: var(--c1);
-            text-shadow: 0 0 6px rgba(0, 230, 118, .6);
-        }
-        
-        .rewards-list {
-            margin-top: 30px;
-        }
-        
-        .rewards-list h3 {
-            margin: 0;
-            color: var(--c1);
-            font-size: 1.1rem;
-        }
-        
-        .rewards-list table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 8px;
-        }
-        
-        .rewards-list th,
-        .rewards-list td {
-            padding: 8px;
-            border-bottom: 1px solid rgba(255, 255, 255, .2);
-            text-align: left;
-            color: #eee;
-        }
-        
-        .rewards-list th {
-            color: var(--c3);
-        }
-    </style>
+    <!-- estilos igual a como los tenías -->
 </head>
 
 <body>
     <h1>Recicla & Gana 🚀</h1>
     <div class="flex">
-        <!-- PANEL ADMIN -->
         <div class="glass" style="flex:1 1 350px; min-width:300px;">
-            <h2 style="text-align:center; text-transform:uppercase; margin-top:0;">Panel Admin</h2>
+            <h2>Panel Admin</h2>
             <label>Nombre del participante</label>
             <input id="name" placeholder="Ej: Valentina" />
             <label>Botellas entregadas</label>
@@ -576,9 +187,8 @@ File: C:\Users\ASUS\Documents\GitHub\recicla_gana\public\index_admin.html
             <button id="add">💾 Guardar / Actualizar</button>
             <div id="msg"></div>
         </div>
-        <!-- RANKING Y RECOMPENSAS -->
         <div class="glass" style="flex:2 1 500px; min-width:300px; overflow:auto; max-height:80vh;">
-            <h2 style="text-align:center; text-transform:uppercase; margin-top:0;">Ranking</h2>
+            <h2>Ranking</h2>
             <table id="board">
                 <thead>
                     <tr>
@@ -591,58 +201,17 @@ File: C:\Users\ASUS\Documents\GitHub\recicla_gana\public\index_admin.html
                 </thead>
                 <tbody></tbody>
             </table>
-            <div class="rewards-list">
-                <h3>📋 Detalle de Recompensas</h3>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Botellas</th>
-                            <th>Recompensa</th>
-                        </tr>
-                    </thead>
-                    <tbody id="rewards-body"></tbody>
-                </table>
-            </div>
+            <!-- detalle de recompensas igual -->
         </div>
     </div>
 
     <script>
         const API_BASE = 'api/';
         const ADMIN_PASS = 'eco123';
-        const REWARD_TIERS = [{
-            b: 10,
-            prize: '1 rollo de papel higiénico'
-        }, {
-            b: 20,
-            prize: '1 paquete de galletas'
-        }, {
-            b: 30,
-            prize: '1 litro de leche o jugo'
-        }, {
-            b: 40,
-            prize: '1 detergente pequeño'
-        }, {
-            b: 50,
-            prize: '1 kg de arroz o azúcar'
-        }, {
-            b: 60,
-            prize: '1 frasco de limpiador multiusos'
-        }, {
-            b: 70,
-            prize: '1 paquete de esponjas'
-        }, {
-            b: 80,
-            prize: '1 litro de aceite'
-        }, {
-            b: 90,
-            prize: '1 producto de higiene personal'
-        }, {
-            b: 100,
-            prize: '1 caja sorpresa'
-        }];
+        const REWARD_TIERS = [ /* ... */ ];
         const trophies = ['🥇', '🥈', '🥉'];
 
-        // **1.** Poblamos el SELECT sólo con los hitos de recompensa
+        // llena el <select> de botellas
         const sel = document.getElementById('bottles');
         REWARD_TIERS.forEach(r => {
             const o = document.createElement('option');
@@ -651,44 +220,37 @@ File: C:\Users\ASUS\Documents\GitHub\recicla_gana\public\index_admin.html
             sel.appendChild(o);
         });
 
-        // Helper para llamadas al API
-        async function api(url, opts = {}) {
-            const res = await fetch(API_BASE + url, opts);
-            if (!res.ok) throw new Error(await res.text());
-            return res.json();
+        // helper API
+        async function api(u, opts = {}) {
+            const r = await fetch(API_BASE + u, opts);
+            if (!r.ok) throw new Error(await r.text());
+            return r.json();
         }
 
-        // Render del ranking
-        const tbody = document.querySelector('#board tbody');
-
-        function rewardsCount(b) {
-            return REWARD_TIERS.filter(t => b >= t.b).length;
-        }
+        // carga ranking
         async function loadBoard() {
             const list = await api('board.php');
-            tbody.innerHTML = '';
+            const tb = document.querySelector('#board tbody');
+            tb.innerHTML = '';
             list.forEach((row, idx) => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td class="trophy">${trophies[idx] || idx + 1}</td>
-                    <td>${row.name}</td>
-                    <td>${row.bottles}</td>
-                    <td>${rewardsCount(row.bottles)}</td>
-                    <td><button class="del-btn" data-name="${row.name}">✖</button></td>
-                `;
-                tbody.appendChild(tr);
+          <td class="trophy">${trophies[idx]||idx+1}</td>
+          <td>${row.name}</td>
+          <td>${row.bottles}</td>
+          <td>${REWARD_TIERS.filter(t=>row.bottles>=t.b).length}</td>
+          <td><button class="del-btn" data-name="${row.name}">✖</button></td>
+        `;
+                tb.appendChild(tr);
             });
         }
         loadBoard();
 
-        // Guardar o actualizar un participante
+        // guardar
         document.getElementById('add').onclick = async() => {
             const name = document.getElementById('name').value.trim();
             const bottles = parseInt(sel.value, 10);
-            if (!name) {
-                alert('Ingresa nombre');
-                return;
-            }
+            if (!name) return alert('Ingresa nombre');
             try {
                 const res = await api('deposit.php', {
                     method: 'POST',
@@ -706,35 +268,26 @@ File: C:\Users\ASUS\Documents\GitHub\recicla_gana\public\index_admin.html
                 setTimeout(() => document.getElementById('msg').textContent = '', 4000);
                 document.getElementById('name').value = '';
             } catch (e) {
-                alert('Error: ' + e.message);
+                alert('Error: ' + e.message)
             }
         };
 
-        // Eliminar un registro
-        tbody.addEventListener('click', async e => {
-            if (e.target.matches('.del-btn')) {
-                const nm = e.target.dataset.name;
-                if (!confirm(`Eliminar registro de ${nm}?`)) return;
-                await api('delete.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        name: nm,
-                        pass: ADMIN_PASS
-                    })
-                });
-                loadBoard();
-            }
-        });
-
-        // Poblado del detalle de recompensas fijo
-        const rb = document.getElementById('rewards-body');
-        REWARD_TIERS.forEach(r => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `<td>${r.b}</td><td>${r.prize}</td>`;
-            rb.appendChild(tr);
+        // eliminar
+        document.querySelector('#board tbody').addEventListener('click', async e => {
+            if (!e.target.matches('.del-btn')) return;
+            const nm = e.target.dataset.name;
+            if (!confirm(`Eliminar ${nm}?`)) return;
+            await api('delete.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    name: nm,
+                    pass: ADMIN_PASS
+                })
+            });
+            loadBoard();
         });
     </script>
 </body>
@@ -744,29 +297,27 @@ File: C:\Users\ASUS\Documents\GitHub\recicla_gana\public\index_admin.html
 File: C:\Users\ASUS\Documents\GitHub\recicla_gana\public\api\board.php
 -------------------------------
 <?php
-ini_set('display_errors', 1);
+ini_set('display_errors',1);
 error_reporting(E_ALL);
 header('Content-Type: application/json; charset=utf-8');
-header('Access-Control-Allow-Origin: *');
 
-$host = getenv('DB_HOST') ?: 'localhost';
-$port = getenv('DB_PORT') ?: '3306';
-$db   = getenv('DB_NAME') ?: 'ecodata';
-$user = getenv('DB_USER') ?: 'root';
-$pass = getenv('DB_PASS') ?: '';
+$host = getenv('DB_HOST');
+$port = getenv('DB_PORT');
+$db   = getenv('DB_NAME');
+$user = getenv('DB_USER');
+$pass = getenv('DB_PASS');
 
 try {
     $pdo = new PDO(
-        "mysql:host={$host};port={$port};dbname={$db};charset=utf8mb4",
-        $user,
-        $pass,
-        [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+        "pgsql:host={$host};port={$port};dbname={$db}",
+        $user, $pass,
+        [PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION]
     );
     $stmt = $pdo->query("SELECT name, bottles FROM scores ORDER BY bottles DESC");
     echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC));
 } catch (PDOException $e) {
     http_response_code(500);
-    echo json_encode(['error' => 'DB read failed: ' . $e->getMessage()]);
+    echo json_encode(['error'=>'DB read failed: '.$e->getMessage()]);
     exit;
 }
 .
@@ -774,44 +325,42 @@ try {
 File: C:\Users\ASUS\Documents\GitHub\recicla_gana\public\api\delete.php
 -------------------------------
 <?php
-ini_set('display_errors', 1);
+ini_set('display_errors',1);
 error_reporting(E_ALL);
 header('Content-Type: application/json; charset=utf-8');
-header('Access-Control-Allow-Origin: *');
 
-$host = getenv('DB_HOST') ?: 'localhost';
-$port = getenv('DB_PORT') ?: '3306';
-$db   = getenv('DB_NAME') ?: 'ecodata';
-$user = getenv('DB_USER') ?: 'root';
-$pass = getenv('DB_PASS') ?: '';
+$host = getenv('DB_HOST');
+$port = getenv('DB_PORT');
+$db   = getenv('DB_NAME');
+$user = getenv('DB_USER');
+$pass = getenv('DB_PASS');
 
 try {
     $pdo = new PDO(
-        "mysql:host={$host};port={$port};dbname={$db};charset=utf8mb4",
-        $user,
-        $pass,
-        [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+        "pgsql:host={$host};port={$port};dbname={$db}",
+        $user, $pass,
+        [PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION]
     );
 } catch (PDOException $e) {
     http_response_code(500);
-    echo json_encode(['error' => 'DB connection failed: ' . $e->getMessage()]);
+    echo json_encode(['error'=>'DB connection failed: '.$e->getMessage()]);
     exit;
 }
 
 $in = json_decode(file_get_contents('php://input'), true);
-if (!is_array($in) || !isset($in['name'], $in['pass']) || $in['pass'] !== 'eco123') {
+if (!is_array($in) || !isset($in['name'],$in['pass']) || $in['pass']!=='eco123') {
     http_response_code(401);
-    echo json_encode(['error' => 'unauthorized']);
+    echo json_encode(['error'=>'unauthorized']);
     exit;
 }
 
 try {
-    $stmt = $pdo->prepare("DELETE FROM scores WHERE name = ?");
-    $stmt->execute([trim($in['name'])]);
-    echo json_encode(['ok' => true]);
+    $stmt = $pdo->prepare("DELETE FROM scores WHERE name = :name");
+    $stmt->execute([':name'=>trim($in['name'])]);
+    echo json_encode(['ok'=>true]);
 } catch (PDOException $e) {
     http_response_code(500);
-    echo json_encode(['error' => 'DB delete failed: ' . $e->getMessage()]);
+    echo json_encode(['error'=>'DB delete failed: '.$e->getMessage()]);
     exit;
 }
 .
@@ -819,38 +368,32 @@ try {
 File: C:\Users\ASUS\Documents\GitHub\recicla_gana\public\api\deposit.php
 -------------------------------
 <?php
-ini_set('display_errors', 1);
+ini_set('display_errors',1);
 error_reporting(E_ALL);
 header('Content-Type: application/json; charset=utf-8');
-header('Access-Control-Allow-Origin: *');
 
-$host = getenv('DB_HOST') ?: 'localhost';
-$port = getenv('DB_PORT') ?: '3306';
-$db   = getenv('DB_NAME') ?: 'ecodata';
-$user = getenv('DB_USER') ?: 'root';
-$pass = getenv('DB_PASS') ?: '';
+$host = getenv('DB_HOST');
+$port = getenv('DB_PORT');
+$db   = getenv('DB_NAME');
+$user = getenv('DB_USER');
+$pass = getenv('DB_PASS');
 
 try {
     $pdo = new PDO(
-        "mysql:host={$host};port={$port};dbname={$db};charset=utf8mb4",
-        $user,
-        $pass,
-        [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+        "pgsql:host={$host};port={$port};dbname={$db}",
+        $user, $pass,
+        [PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION]
     );
 } catch (PDOException $e) {
     http_response_code(500);
-    echo json_encode(['error' => 'DB connection failed: ' . $e->getMessage()]);
+    echo json_encode(['error'=>'DB connection failed: '.$e->getMessage()]);
     exit;
 }
 
 $in = json_decode(file_get_contents('php://input'), true);
-if (
-    !is_array($in) ||
-    !isset($in['name'], $in['bottles'], $in['pass']) ||
-    $in['pass'] !== 'eco123'
-) {
+if (!is_array($in) || !isset($in['name'],$in['bottles'],$in['pass']) || $in['pass']!=='eco123') {
     http_response_code(401);
-    echo json_encode(['error' => 'unauthorized']);
+    echo json_encode(['error'=>'unauthorized']);
     exit;
 }
 
@@ -859,20 +402,20 @@ $bottles = intval($in['bottles']);
 
 try {
     $stmt = $pdo->prepare("
-        INSERT INTO scores (`name`, `bottles`)
-        VALUES (?, ?)
-        ON DUPLICATE KEY UPDATE
-          bottles = bottles + VALUES(bottles)
+      INSERT INTO scores (name, bottles)
+      VALUES (:name, :bottles)
+      ON CONFLICT (name) DO UPDATE
+        SET bottles = scores.bottles + EXCLUDED.bottles
     ");
-    $stmt->execute([$name, $bottles]);
+    $stmt->execute([':name'=>$name, ':bottles'=>$bottles]);
 
-    $stmt = $pdo->prepare("SELECT bottles FROM scores WHERE `name` = ?");
-    $stmt->execute([$name]);
+    $stmt = $pdo->prepare("SELECT bottles FROM scores WHERE name = :name");
+    $stmt->execute([':name'=>$name]);
     $total = (int)$stmt->fetchColumn();
 
-    echo json_encode(['total' => $total]);
+    echo json_encode(['total'=>$total]);
 } catch (PDOException $e) {
     http_response_code(500);
-    echo json_encode(['error' => 'DB write/read failed: ' . $e->getMessage()]);
+    echo json_encode(['error'=>'DB write/read failed: '.$e->getMessage()]);
     exit;
 }
