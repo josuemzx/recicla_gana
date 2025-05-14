@@ -79,14 +79,12 @@
             border-radius: 12px;
             font-size: 1rem;
         }
-        /* fondo semitransparente, texto negro */
         
         input,
         select {
             background: rgba(255, 255, 255, .15);
             color: #000;
         }
-        /* opciones legibles */
         
         select option {
             background: #fff;
@@ -191,7 +189,6 @@
 <body>
     <h1>Recicla & Gana 🚀</h1>
     <div class="flex">
-        <!-- Admin -->
         <div class="glass" style="flex:1 1 350px; min-width:300px;">
             <h2 style="text-align:center; text-transform:uppercase; margin-top:0;">Panel Admin</h2>
             <label>Nombre del participante</label>
@@ -201,7 +198,6 @@
             <button id="add">💾 Guardar / Actualizar</button>
             <div id="msg"></div>
         </div>
-        <!-- Ranking + Recompensas -->
         <div class="glass" style="flex:2 1 500px; min-width:300px; overflow:auto; max-height:80vh;">
             <h2 style="text-align:center; text-transform:uppercase; margin-top:0;">Ranking</h2>
             <table id="board">
@@ -265,40 +261,49 @@
             prize: '1 caja sorpresa'
         }];
         const trophies = ['🥇', '🥈', '🥉'];
-        async function api(u, o = {}) {
-            let r = await fetch(API_BASE + u, o);
-            if (!r.ok) throw new Error(await r.text());
-            return r.json();
-        }
-        // select hasta 100
+
+        // Poblamos SELECT solo con los valores fijos de REWARD_TIERS
         const sel = document.getElementById('bottles');
-        for (let i = 1; i <= 100; i++) {
+        REWARD_TIERS.forEach(r => {
             const o = document.createElement('option');
-            o.value = i;
-            o.textContent = i;
+            o.value = r.b;
+            o.textContent = r.b;
             sel.appendChild(o);
+        });
+
+        async function api(url, opts = {}) {
+            const res = await fetch(API_BASE + url, opts);
+            if (!res.ok) throw new Error(await res.text());
+            return res.json();
         }
+
+        // Cargar ranking
         const tbody = document.querySelector('#board tbody');
 
         function rewardsCount(b) {
             return REWARD_TIERS.filter(t => b >= t.b).length;
         }
         async function loadBoard() {
-            let list = await api('board.php');
+            const list = await api('board.php');
             tbody.innerHTML = '';
-            list.forEach((r, i) => {
+            list.forEach((row, idx) => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-    <td class="trophy">${trophies[i]||i+1}</td>
-    <td>${r.name}</td><td>${r.bottles}</td><td>${rewardsCount(r.bottles)}</td>
-    <td><button class="del-btn" data-name="${r.name}">✖</button></td>`;
+          <td class="trophy">${trophies[idx]||idx+1}</td>
+          <td>${row.name}</td>
+          <td>${row.bottles}</td>
+          <td>${rewardsCount(row.bottles)}</td>
+          <td><button class="del-btn" data-name="${row.name}">✖</button></td>
+        `;
                 tbody.appendChild(tr);
             });
         }
         loadBoard();
+
+        // Guardar / Actualizar
         document.getElementById('add').onclick = async() => {
-            const name = document.getElementById('name').value.trim(),
-                bot = parseInt(sel.value);
+            const name = document.getElementById('name').value.trim();
+            const bottles = parseInt(sel.value, 10);
             if (!name) {
                 alert('Ingresa nombre');
                 return;
@@ -311,7 +316,7 @@
                     },
                     body: JSON.stringify({
                         name,
-                        bottles: bot,
+                        bottles,
                         pass: ADMIN_PASS
                     })
                 });
@@ -323,6 +328,8 @@
                 alert('Error: ' + e.message);
             }
         };
+
+        // Eliminar registro
         tbody.addEventListener('click', async e => {
             if (e.target.matches('.del-btn')) {
                 const nm = e.target.dataset.name;
@@ -340,7 +347,8 @@
                 loadBoard();
             }
         });
-        // detalle
+
+        // Poblado de detalle de recompensas
         const rb = document.getElementById('rewards-body');
         REWARD_TIERS.forEach(r => {
             const tr = document.createElement('tr');
