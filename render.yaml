@@ -3,12 +3,16 @@ services:
     name: recicla-gana            # nombre de tu servicio
     env: docker
     plan: free
-    region: oregon                # o tu región favorita
+    region: oregon                # tu región favorita
     dockerfilePath: Dockerfile
     envVars:
       - key: DB_HOST
         fromDatabase:
           name: ecodata
+      - key: DB_PORT
+        fromDatabase:
+          name: ecodata
+          property: port
       - key: DB_NAME
         value: ecodata
       - key: DB_USER
