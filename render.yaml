@@ -1,20 +1,26 @@
 services:
   - type: web
-    name: recicla-gana
+    name: recicla-gana            # nombre de tu servicio
     env: docker
     plan: free
-    region: oregon
+    region: oregon                # o tu región favorita
     dockerfilePath: Dockerfile
     envVars:
       - key: DB_HOST
-        value: <your-mysql-host>
+        fromDatabase:
+          name: ecodata
       - key: DB_NAME
         value: ecodata
       - key: DB_USER
-        value: <your-user>
+        fromDatabase:
+          name: ecodata
+          property: user
       - key: DB_PASS
-        value: <your-password>
+        fromDatabase:
+          name: ecodata
+          property: password
+
 databases:
-  - name: ecodata
-    postgres: false
+  - name: ecodata                 # nombre de tu base de datos
+    engine: mysql
     plan: free
