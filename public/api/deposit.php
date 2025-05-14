@@ -1,36 +1,30 @@
 <?php
-ini_set('display_errors', 1);
+ini_set('display_errors',1);
 error_reporting(E_ALL);
 header('Content-Type: application/json; charset=utf-8');
-header('Access-Control-Allow-Origin: *');
 
-$host = getenv('DB_HOST') ?: 'localhost';
-$port = getenv('DB_PORT') ?: '3306';
-$db   = getenv('DB_NAME') ?: 'ecodata';
-$user = getenv('DB_USER') ?: 'root';
-$pass = getenv('DB_PASS') ?: '';
+$host = getenv('DB_HOST');
+$port = getenv('DB_PORT');
+$db   = getenv('DB_NAME');
+$user = getenv('DB_USER');
+$pass = getenv('DB_PASS');
 
 try {
     $pdo = new PDO(
-        "mysql:host={$host};port={$port};dbname={$db};charset=utf8mb4",
-        $user,
-        $pass,
-        [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
+        "pgsql:host={$host};port={$port};dbname={$db}",
+        $user, $pass,
+        [PDO::ATTR_ERRMODE=>PDO::ERRMODE_EXCEPTION]
     );
 } catch (PDOException $e) {
     http_response_code(500);
-    echo json_encode(['error' => 'DB connection failed: ' . $e->getMessage()]);
+    echo json_encode(['error'=>'DB connection failed: '.$e->getMessage()]);
     exit;
 }
 
 $in = json_decode(file_get_contents('php://input'), true);
-if (
-    !is_array($in) ||
-    !isset($in['name'], $in['bottles'], $in['pass']) ||
-    $in['pass'] !== 'eco123'
-) {
+if (!is_array($in) || !isset($in['name'],$in['bottles'],$in['pass']) || $in['pass']!=='eco123') {
     http_response_code(401);
-    echo json_encode(['error' => 'unauthorized']);
+    echo json_encode(['error'=>'unauthorized']);
     exit;
 }
 
@@ -39,20 +33,20 @@ $bottles = intval($in['bottles']);
 
 try {
     $stmt = $pdo->prepare("
-        INSERT INTO scores (`name`, `bottles`)
-        VALUES (?, ?)
-        ON DUPLICATE KEY UPDATE
-          bottles = bottles + VALUES(bottles)
+      INSERT INTO scores (name, bottles)
+      VALUES (:name, :bottles)
+      ON CONFLICT (name) DO UPDATE
+        SET bottles = scores.bottles + EXCLUDED.bottles
     ");
-    $stmt->execute([$name, $bottles]);
+    $stmt->execute([':name'=>$name, ':bottles'=>$bottles]);
 
-    $stmt = $pdo->prepare("SELECT bottles FROM scores WHERE `name` = ?");
-    $stmt->execute([$name]);
+    $stmt = $pdo->prepare("SELECT bottles FROM scores WHERE name = :name");
+    $stmt->execute([':name'=>$name]);
     $total = (int)$stmt->fetchColumn();
 
-    echo json_encode(['total' => $total]);
+    echo json_encode(['total'=>$total]);
 } catch (PDOException $e) {
     http_response_code(500);
-    echo json_encode(['error' => 'DB write/read failed: ' . $e->getMessage()]);
+    echo json_encode(['error'=>'DB write/read failed: '.$e->getMessage()]);
     exit;
 }
