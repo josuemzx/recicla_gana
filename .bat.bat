@@ -3,37 +3,31 @@ setlocal enabledelayedexpansion
 
 REM Nombre del fichero de salida
 set "OUTFILE=project_contents.txt"
-
-REM Si existe, lo borramos para partir limpio
 if exist "%OUTFILE%" del /q "%OUTFILE%"
 
-REM Cabecera
-(
-  echo ================================
-  echo  Listado y contenido del proyecto
-  echo  Generado el %date% a las %time%
-  echo ================================
-  echo.
-) >> "%OUTFILE%"
+REM Ruta completa de este script, para excluirlo
+set "SCRIPT=%~f0"
 
-REM Recorre carpetas y ficheros
+REM Cabecera opcional
+>>"%OUTFILE%" echo ================================
+>>"%OUTFILE%" echo Listado de archivos (sin .git ni este .bat)
+>>"%OUTFILE%" echo ================================
+
+REM Recorre todos los ficheros bajo la carpeta del script
 for /R "%~dp0" %%F in (*) do (
-  REM Evita incluir el propio outfile si está dentro del árbol
-  if /I not "%%~nxF"=="%OUTFILE%" (
-    REM Imprime separador y ruta
-    (
-      echo ------------------------------------------------
-      echo File: %%~dpF%%~nxF
-      echo ------------------------------------------------
-    ) >> "%OUTFILE%"
-
-    REM Imprime contenido
-    type "%%F" >> "%OUTFILE%"
-
-    REM Línea en blanco para separar
-    echo. >> "%OUTFILE%"
-  )
+    REM Si la ruta contiene \.git\, la saltamos
+    echo "%%~fF" | findstr /i "\\.git\\" >nul && (
+        rem Skip .git
+    ) || (
+        REM Excluir este propio script
+        if /I not "%%~fF"=="!SCRIPT!" (
+            >>"%OUTFILE%" echo.
+            >>"%OUTFILE%" echo ================================
+            >>"%OUTFILE%" echo File: %%~dpnxF
+            >>"%OUTFILE%" echo -------------------------------
+            type "%%~fF" >>"%OUTFILE%"
+        )
+    )
 )
 
-echo Listado completo en "%OUTFILE%".
-pause
+endlocal
