@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ranking – Recicla & Gana</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet" />
+    <style>
+         :root {
+            --c1: #00e676;
+            --c2: #00b0ff;
+            --c3: #ffc400;
+            --bg: #141e30;
+            --bg2: #243b55;
+        }
+        
+        * {
+            box-sizing: border-box
+        }
+        
+        html,
+        body {
+            margin: 0;
+            height: 100%;
+            font-family: 'Montserrat', sans-serif;
+            color: #fff;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--bg), var(--bg2));
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 12px;
+            overflow-x: hidden
+        }
+        
+        h1 {
+            font-weight: 900;
+            font-size: 3rem;
+            margin: 0 0 20px;
+            text-align: center;
+            background: linear-gradient(90deg, var(--c1), var(--c2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, .5));
+        }
+        
+        .glass {
+            background: rgba(255, 255, 255, .08);
+            border-radius: 22px;
+            padding: 28px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, .4);
+            width: 100%;
+            max-width: 1000px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 1rem;
+            border-radius: 16px;
+            overflow: hidden;
+        }
+        
+        th,
+        td {
+            padding: 14px 12px;
+            text-align: left;
+        }
+        
+        thead th {
+            background: rgba(255, 255, 255, .15);
+            font-weight: 700;
+            letter-spacing: .5px;
+            color: #ffea00;
+        }
+        
+        tbody tr:nth-child(odd) {
+            background: rgba(0, 0, 0, .05);
+        }
+        
+        tbody tr:hover {
+            background: rgba(255, 255, 255, .05);
+        }
+        
+        .trophy {
+            font-size: 1.5rem;
+            filter: drop-shadow(0 0 4px rgba(255, 255, 255, .6));
+        }
+        /* Animated glow around top 3 rows */
+        
+        tbody tr:nth-child(-n+3) {
+            position: relative;
+        }
+        
+        tbody tr:nth-child(-n+3)::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: 8px;
+            background: linear-gradient(45deg, var(--c1), var(--c2), var(--c3));
+            opacity: .35;
+            z-index: -1;
+            filter: blur(15px);
+        }
+        /* Badge */
+        
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: .8rem;
+            font-weight: 700;
+            background: var(--c1);
+            color: #003c26;
+        }
+        /* Footer */
+        
+        footer {
+            margin-top: 30px;
+            font-size: .85rem;
+            color: #ccc;
+            text-align: center;
+            opacity: .6
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🏆 Ranking Recicla & Gana</h1>
+    <div class="glass">
+        <table id="board">
+            <thead>
+                <tr>
+                    <th>Puesto</th>
+                    <th>Participante</th>
+                    <th>Botellas ♻️</th>
+                    <th>Premios 🎁</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+    <footer>Actualizado cada 15&nbsp;s</footer>
+
+    <script>
+        const API_BASE = 'api/';
+        const REWARD_TIERS = [{
+            b: 10
+        }, {
+            b: 20
+        }, {
+            b: 30
+        }, {
+            b: 40
+        }, {
+            b: 50
+        }, {
+            b: 60
+        }, {
+            b: 70
+        }, {
+            b: 80
+        }, {
+            b: 90
+        }, {
+            b: 100
+        }];
+        const trophies = ['🥇', '🥈', '🥉'];
+        const rewardCount = b => REWARD_TIERS.filter(t => b >= t.b).length;
+        async function load() {
+            try {
+                const res = await fetch(API_BASE + 'board.php');
+                const list = await res.json();
+                const tbody = document.querySelector('#board tbody');
+                tbody.innerHTML = '';
+                list.forEach((r, i) => {
+                    const tr = document.createElement('tr');
+                    const place = trophies[i] || `<span class="badge">${i+1}</span>`;
+                    tr.innerHTML = `<td class="trophy">${place}</td><td>${r.name}</td><td>${r.bottles}</td><td>${rewardCount(r.bottles)}</td>`;
+                    tbody.appendChild(tr);
+                });
+            } catch (e) {
+                console.error(e);
+            }
+        }
+        load();
+        setInterval(load, 15000);
+    </script>
+</body>
+
+</html>

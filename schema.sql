@@ -1,0 +1,4 @@
+CREATE TABLE IF NOT EXISTS scores(
+  name VARCHAR(60) PRIMARY KEY,
+  bottles INT DEFAULT 0
+);

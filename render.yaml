@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: recicla-gana
+    env: docker
+    plan: free
+    region: oregon
+    dockerfilePath: Dockerfile
+    envVars:
+      - key: DB_HOST
+        value: <your-mysql-host>
+      - key: DB_NAME
+        value: ecodata
+      - key: DB_USER
+        value: <your-user>
+      - key: DB_PASS
+        value: <your-password>
+databases:
+  - name: ecodata
+    postgres: false
+    plan: free

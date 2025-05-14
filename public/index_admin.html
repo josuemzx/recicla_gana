@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Recicla & Gana – Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet" />
+    <style>
+         :root {
+            --c1: #00e676;
+            --c2: #00b0ff;
+            --c3: #ffc400;
+            --bg: #0f2027;
+            --bg2: #203a43;
+            --bg3: #2c5364;
+        }
+        
+        *,
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+            color: #fff;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--bg), var(--bg2), var(--bg3));
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+        
+        h1 {
+            font-weight: 900;
+            font-size: 3rem;
+            margin: 10px 0 25px;
+            text-align: center;
+            background: linear-gradient(90deg, var(--c1), var(--c2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, .5));
+        }
+        
+        .glass {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 22px;
+            padding: 28px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, .4);
+        }
+        
+        .flex {
+            display: flex;
+            gap: 40px;
+            flex-wrap: wrap;
+            width: 100%;
+            max-width: 1200px;
+        }
+        
+        label {
+            display: block;
+            margin: 14px 0 8px;
+            font-weight: 700;
+            font-size: .9rem;
+            color: #cfd8dc;
+        }
+        
+        input,
+        select,
+        button {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+        }
+        
+        input,
+        select {
+            background: rgba(255, 255, 255, .15);
+            color: #fff;
+        }
+        /* aquí forzamos opciones legibles */
+        
+        select option {
+            background: #fff;
+            color: #000;
+        }
+        
+        input::placeholder {
+            color: #b0bec5;
+        }
+        
+        button {
+            margin-top: 20px;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--c1), var(--c2));
+            color: #003c26;
+            cursor: pointer;
+            transition: transform .2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: .9rem;
+        }
+        
+        th,
+        td {
+            padding: 12px 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, .12);
+        }
+        
+        th {
+            color: #ffeb3b;
+            text-shadow: 0 0 4px rgba(255, 235, 59, .6);
+        }
+        
+        tbody tr:nth-child(odd) {
+            background: rgba(0, 0, 0, .05);
+        }
+        
+        tbody tr:hover {
+            background: rgba(255, 255, 255, .05);
+        }
+        
+        .trophy {
+            font-size: 1.4rem;
+        }
+        
+        .del-btn {
+            background: none;
+            border: none;
+            color: #ef5350;
+            font-size: 1.3rem;
+            cursor: pointer;
+        }
+        
+        #msg {
+            margin-top: 16px;
+            font-weight: 700;
+            color: #00e676;
+            text-shadow: 0 0 6px rgba(0, 230, 118, .6);
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Recicla & Gana 🚀</h1>
+    <div class="flex">
+        <div class="glass" style="flex:1 1 350px;min-width:300px;">
+            <h2 style="text-align:center;text-transform:uppercase;margin-top:0;">Panel Admin</h2>
+            <label>Nombre del participante</label>
+            <input id="name" placeholder="Ej: Valentina" />
+            <label>Botellas entregadas</label>
+            <select id="bottles"></select>
+            <button id="add">💾 Guardar / Actualizar</button>
+            <div id="msg"></div>
+        </div>
+        <div class="glass" style="flex:2 1 500px;min-width:300px;overflow:auto;max-height:80vh;">
+            <h2 style="text-align:center;text-transform:uppercase;margin-top:0;">Ranking</h2>
+            <table id="board">
+                <thead>
+                    <tr>
+                        <th>Puesto</th>
+                        <th>Participante</th>
+                        <th>Botellas</th>
+                        <th>Premios</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'api/';
+        const ADMIN_PASS = 'eco123';
+        const REWARD_TIERS = [{
+            b: 10
+        }, {
+            b: 20
+        }, {
+            b: 30
+        }, {
+            b: 40
+        }, {
+            b: 50
+        }, {
+            b: 60
+        }, {
+            b: 70
+        }, {
+            b: 80
+        }, {
+            b: 90
+        }, {
+            b: 100
+        }];
+        const trophies = ['🥇', '🥈', '🥉'];
+        const rewardsCnt = b => REWARD_TIERS.filter(t => b >= t.b).length;
+        async function api(u, o = {}) {
+            const r = await fetch(API_BASE + u, o);
+            if (!r.ok) throw new Error(await r.text());
+            return r.json();
+        }
+
+        // Rellenar 1–40
+        const sel = document.getElementById('bottles');
+        for (let i = 1; i <= 40; i++) {
+            const o = document.createElement('option');
+            o.value = i;
+            o.textContent = i;
+            sel.appendChild(o);
+        }
+
+        // Cargar ranking
+        const tbody = document.querySelector('#board tbody');
+        async function loadBoard() {
+            const lst = await api('board.php');
+            tbody.innerHTML = '';
+            lst.forEach((r, i) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+          <td class="trophy">${trophies[i]||i+1}</td>
+          <td>${r.name}</td>
+          <td>${r.bottles}</td>
+          <td>${rewardsCnt(r.bottles)}</td>
+          <td><button class="del-btn" data-name="${r.name}">✖</button></td>
+        `;
+                tbody.appendChild(tr);
+            });
+        }
+        loadBoard();
+
+        // Guardar/actualizar
+        document.getElementById('add').onclick = async() => {
+            const name = document.getElementById('name').value.trim();
+            const bottles = parseInt(sel.value, 10);
+            if (!name) {
+                alert('Ingresa nombre');
+                return;
+            }
+            try {
+                const res = await api('deposit.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name,
+                        bottles,
+                        pass: ADMIN_PASS
+                    })
+                });
+                document.getElementById('msg').textContent = `✔️ ${name} ahora tiene ${res.total} botellas`;
+                loadBoard();
+                setTimeout(() => document.getElementById('msg').textContent = '', 4000);
+                document.getElementById('name').value = '';
+            } catch (err) {
+                alert('Error: ' + err.message);
+            }
+        };
+
+        // Eliminar
+        tbody.addEventListener('click', async e => {
+            if (e.target.matches('.del-btn')) {
+                const nm = e.target.dataset.name;
+                if (!confirm(`Eliminar registro de ${nm}?`)) return;
+                try {
+                    await api('delete.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            name: nm,
+                            pass: ADMIN_PASS
+                        })
+                    });
+                    loadBoard();
+                } catch {
+                    alert('Error eliminando');
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>
