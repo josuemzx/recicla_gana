@@ -5,21 +5,148 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Recicla & Gana – Admin</title>
-    <!-- estilos igual a como los tenías -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet" />
+    <style>
+         :root {
+            --c1: #00e676;
+            --c2: #00b0ff;
+            --c3: #ffc400;
+            --bg: #0f2027;
+            --bg2: #203a43;
+            --bg3: #2c5364;
+        }
+        
+        *,
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+            color: #fff;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--bg), var(--bg2), var(--bg3));
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+        
+        h1 {
+            font-weight: 900;
+            font-size: 3rem;
+            margin: 10px 0 25px;
+            background: linear-gradient(90deg, var(--c1), var(--c2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, .5));
+        }
+        
+        .flex {
+            display: flex;
+            gap: 40px;
+            flex-wrap: wrap;
+            width: 100%;
+            max-width: 1200px;
+        }
+        
+        .glass {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 22px;
+            padding: 28px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, .4);
+        }
+        
+        h2 {
+            margin-bottom: 16px;
+        }
+        
+        label {
+            display: block;
+            margin: 12px 0 4px;
+            font-weight: 700;
+        }
+        
+        input,
+        select,
+        button {
+            width: 100%;
+            padding: 8px 12px;
+            margin-bottom: 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+        
+        button {
+            background: linear-gradient(90deg, var(--c1), var(--c2));
+            color: #000;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        
+        #msg {
+            margin-top: 8px;
+            min-height: 1.2em;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 8px;
+        }
+        
+        th,
+        td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        th {
+            color: var(--c3);
+        }
+        
+        .trophy {
+            width: 1.6em;
+        }
+        
+        .del-btn {
+            background: transparent;
+            border: none;
+            font-size: 1.1rem;
+            color: #f55;
+            cursor: pointer;
+        }
+        
+        footer {
+            margin-top: 20px;
+            font-size: .9rem;
+            opacity: .8;
+        }
+    </style>
 </head>
 
 <body>
-    <h1>Recicla & Gana 🚀</h1>
+    <h1>Recicla &amp; Gana 🚀</h1>
+
     <div class="flex">
+        <!-- Panel Admin -->
         <div class="glass" style="flex:1 1 350px; min-width:300px;">
             <h2>Panel Admin</h2>
-            <label>Nombre del participante</label>
+            <label for="name">Nombre del participante</label>
             <input id="name" placeholder="Ej: Valentina" />
-            <label>Botellas entregadas</label>
+            <label for="bottles">Botellas entregadas</label>
             <select id="bottles"></select>
             <button id="add">💾 Guardar / Actualizar</button>
             <div id="msg"></div>
         </div>
+
+        <!-- Ranking + Detalle de recompensas -->
         <div class="glass" style="flex:2 1 500px; min-width:300px; overflow:auto; max-height:80vh;">
             <h2>Ranking</h2>
             <table id="board">
@@ -34,17 +161,59 @@
                 </thead>
                 <tbody></tbody>
             </table>
-            <!-- detalle de recompensas igual -->
+
+            <h2>📋 Detalle de Recompensas</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Botellas</th>
+                        <th>Recompensa</th>
+                    </tr>
+                </thead>
+                <tbody id="rewards-body"></tbody>
+            </table>
         </div>
     </div>
+
+    <footer>Actualizado cada 15&nbsp;s</footer>
 
     <script>
         const API_BASE = 'api/';
         const ADMIN_PASS = 'eco123';
-        const REWARD_TIERS = [ /* ... */ ];
+        const REWARD_TIERS = [{
+            b: 10,
+            prize: '1 rollo de papel higiénico'
+        }, {
+            b: 20,
+            prize: '1 paquete de galletas'
+        }, {
+            b: 30,
+            prize: '1 litro de leche o jugo'
+        }, {
+            b: 40,
+            prize: '1 detergente pequeño'
+        }, {
+            b: 50,
+            prize: '1 kg de arroz o azúcar'
+        }, {
+            b: 60,
+            prize: '1 frasco de limpiador multiusos'
+        }, {
+            b: 70,
+            prize: '1 paquete de esponjas'
+        }, {
+            b: 80,
+            prize: '1 litro de aceite'
+        }, {
+            b: 90,
+            prize: '1 producto de higiene personal'
+        }, {
+            b: 100,
+            prize: '1 caja sorpresa'
+        }];
         const trophies = ['🥇', '🥈', '🥉'];
 
-        // llena el <select> de botellas
+        // Rellena el <select> de botellas
         const sel = document.getElementById('bottles');
         REWARD_TIERS.forEach(r => {
             const o = document.createElement('option');
@@ -53,14 +222,14 @@
             sel.appendChild(o);
         });
 
-        // helper API
+        // Helper API
         async function api(u, opts = {}) {
-            const r = await fetch(API_BASE + u, opts);
-            if (!r.ok) throw new Error(await r.text());
-            return r.json();
+            const res = await fetch(API_BASE + u, opts);
+            if (!res.ok) throw new Error(await res.text());
+            return res.json();
         }
 
-        // carga ranking
+        // Carga el ranking
         async function loadBoard() {
             const list = await api('board.php');
             const tb = document.querySelector('#board tbody');
@@ -78,8 +247,9 @@
             });
         }
         loadBoard();
+        setInterval(loadBoard, 15000);
 
-        // guardar
+        // Guardar / Actualizar
         document.getElementById('add').onclick = async() => {
             const name = document.getElementById('name').value.trim();
             const bottles = parseInt(sel.value, 10);
@@ -101,11 +271,11 @@
                 setTimeout(() => document.getElementById('msg').textContent = '', 4000);
                 document.getElementById('name').value = '';
             } catch (e) {
-                alert('Error: ' + e.message)
+                alert('Error: ' + e.message);
             }
         };
 
-        // eliminar
+        // Eliminar registro
         document.querySelector('#board tbody').addEventListener('click', async e => {
             if (!e.target.matches('.del-btn')) return;
             const nm = e.target.dataset.name;
@@ -121,6 +291,14 @@
                 })
             });
             loadBoard();
+        });
+
+        // Poblado fijo del detalle de recompensas
+        const rb = document.getElementById('rewards-body');
+        REWARD_TIERS.forEach(r => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td>${r.b}</td><td>${r.prize}</td>`;
+            rb.appendChild(tr);
         });
     </script>
 </body>

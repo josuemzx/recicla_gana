@@ -5,11 +5,163 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Ranking – Recicla & Gana</title>
-    <!-- estilos omitidos para brevedad; copia los tuyos tal cual -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&display=swap" rel="stylesheet" />
+    <style>
+         :root {
+            --c1: #00e676;
+            --c2: #00b0ff;
+            --c3: #ffc400;
+            --bg: #141e30;
+            --bg2: #243b55;
+        }
+        
+        *,
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Montserrat', sans-serif;
+            color: #fff;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--bg), var(--bg2));
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 12px;
+            overflow-x: hidden;
+        }
+        
+        h1 {
+            font-weight: 900;
+            font-size: 3rem;
+            margin: 0 0 20px;
+            text-align: center;
+            background: linear-gradient(90deg, var(--c1), var(--c2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, .5));
+        }
+        
+        .glass {
+            background: rgba(255, 255, 255, .08);
+            border-radius: 22px;
+            padding: 28px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, .4);
+            width: 100%;
+            max-width: 1000px;
+            margin-bottom: 20px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 1rem;
+        }
+        
+        th,
+        td {
+            padding: 14px 12px;
+            text-align: left;
+        }
+        
+        thead th {
+            background: rgba(255, 255, 255, .15);
+            font-weight: 700;
+            letter-spacing: .5px;
+            color: #ffea00;
+        }
+        
+        tbody tr:nth-child(odd) {
+            background: rgba(0, 0, 0, .05);
+        }
+        
+        tbody tr:hover {
+            background: rgba(255, 255, 255, .05);
+        }
+        
+        .trophy {
+            font-size: 1.5rem;
+            filter: drop-shadow(0 0 4px rgba(255, 255, 255, .6));
+        }
+        
+        tbody tr:nth-child(-n+3)::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: 8px;
+            background: linear-gradient(45deg, var(--c1), var(--c2), var(--c3));
+            opacity: .35;
+            z-index: -1;
+            filter: blur(15px);
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: .8rem;
+            font-weight: 700;
+            background: var(--c1);
+            color: #003c26;
+        }
+        
+        .rewards-list {
+            background: rgba(255, 255, 255, .08);
+            border-radius: 22px;
+            padding: 28px;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, .4);
+            width: 100%;
+            max-width: 1000px;
+        }
+        
+        .rewards-list h2 {
+            margin: 0;
+            color: var(--c1);
+            text-align: center;
+            font-size: 1.5rem;
+        }
+        
+        .rewards-list table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16px;
+            font-size: .95rem;
+        }
+        
+        .rewards-list th,
+        .rewards-list td {
+            padding: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, .12);
+            color: #eee;
+            text-align: left;
+        }
+        
+        .rewards-list th {
+            background: rgba(255, 255, 255, .15);
+            color: var(--c3);
+            font-weight: 700;
+        }
+        
+        footer {
+            margin-top: 10px;
+            font-size: .85rem;
+            color: #ccc;
+            text-align: center;
+            opacity: .6;
+        }
+    </style>
 </head>
 
 <body>
-    <h1>🏆 Ranking Recicla & Gana</h1>
+    <h1>Recicla & Gana 🚀</h1>
+
     <div class="glass">
         <table id="board">
             <thead>
@@ -23,35 +175,91 @@
             <tbody></tbody>
         </table>
     </div>
-    <!-- tabla de recompensas igual a como la tenías -->
-    <script>
-        const API_BASE = 'api/';
-        const REWARD_TIERS = [ /* ... */ ]; // igual que antes
-        const trophies = ['🥇', '🥈', '🥉'];
 
-        function rewardsCount(b) {
-            return REWARD_TIERS.filter(t => b >= t.b).length;
-        }
+    <div class="rewards-list">
+        <h2>📋 Detalle de Recompensas</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Botellas Recicladas</th>
+                    <th>Recompensa</th>
+                </tr>
+            </thead>
+            <tbody id="rewards-body"></tbody>
+        </table>
+    </div>
+
+    <footer>&copy; 2023 Recicla & Gana</footer>
+
+    <script>
+        const API_BASE = window.location.origin + '/api/';
+        const REWARD_TIERS = [{
+            b: 10,
+            prize: '1 rollo de papel higiénico'
+        }, {
+            b: 20,
+            prize: '1 paquete de galletas'
+        }, {
+            b: 30,
+            prize: '1 litro de leche o jugo'
+        }, {
+            b: 40,
+            prize: '1 detergente pequeño'
+        }, {
+            b: 50,
+            prize: '1 kg de arroz o azúcar'
+        }, {
+            b: 60,
+            prize: '1 frasco de limpiador multiusos'
+        }, {
+            b: 70,
+            prize: '1 paquete de esponjas'
+        }, {
+            b: 80,
+            prize: '1 litro de aceite'
+        }, {
+            b: 90,
+            prize: '1 producto de higiene personal'
+        }, {
+            b: 100,
+            prize: '1 caja sorpresa'
+        }];
+        const trophies = ['🥇', '🥈', '🥉'];
         async function load() {
-            const res = await fetch(API_BASE + 'board.php');
-            const list = await res.json();
-            const tb = document.querySelector('#board tbody');
-            tb.innerHTML = '';
-            list.forEach((r, i) => {
-                const tr = document.createElement('tr');
-                const place = trophies[i] || `<span class="badge">${i+1}</span>`;
-                tr.innerHTML = `
-          <td class="trophy">${place}</td>
-          <td>${r.name}</td>
-          <td>${r.bottles}</td>
-          <td>${rewardsCount(r.bottles)}</td>
-        `;
-                tb.appendChild(tr);
-            });
+            try {
+                const res = await fetch(API_BASE + 'board.php');
+                const list = await res.json();
+                const tb = document.querySelector('#board tbody');
+                tb.innerHTML = '';
+                list.forEach((r, i) => {
+                    const tr = document.createElement('tr');
+                    const place = trophies[i] || `<span class="badge">${i+1}</span>`;
+                    tr.innerHTML = `
+            <td class="trophy">${place}</td>
+            <td>${r.name}</td>
+            <td>${r.bottles}</td>
+            <td>${rewardsCount(r.bottles)}</td>
+          `;
+                    tb.appendChild(tr);
+                });
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function rewardsCount(n) {
+            return REWARD_TIERS.filter(r => n >= r.b).length || '-';
         }
         load();
         setInterval(load, 15000);
-        // rellena detalle de recompensas...
+
+        // rellena el detalle estático
+        const rb = document.getElementById('rewards-body');
+        REWARD_TIERS.forEach(r => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td>${r.b}</td><td>${r.prize}</td>`;
+            rb.appendChild(tr);
+        });
     </script>
 </body>
 
