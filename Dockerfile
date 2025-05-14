@@ -1,14 +1,18 @@
-# Usa la imagen oficial de PHP + Apache
+# Dockerfile
 FROM php:8.2-apache
 
-# Instala PDO-MySQL para que PDO pueda hablar con MySQL
-RUN docker-php-ext-install pdo_mysql
+# 1) Instala PDO y el driver MySQL
+RUN docker-php-ext-install pdo pdo_mysql
 
-# Habilita los módulos de Apache que necesitas
+# 2) Habilita mod_rewrite y headers en Apache
 RUN a2enmod rewrite headers
 
-# Copia tu frontend al directorio raíz de Apache
+# 3) Copia todo el contenido de public/ a la carpeta raíz de Apache
 COPY public/ /var/www/html/
 
+# 4) Sitúa el WORKDIR donde están los .php
+WORKDIR /var/www/html
+
+# 5) Expón el puerto 80 y arranca Apache
 EXPOSE 80
 CMD ["apache2-foreground"]

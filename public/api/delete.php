@@ -19,7 +19,7 @@ try {
     );
 } catch (PDOException $e) {
     http_response_code(500);
-    echo json_encode(['error' => 'DB connection failed: '.$e->getMessage()]);
+    echo json_encode(['error' => 'DB connection failed: ' . $e->getMessage()]);
     exit;
 }
 
@@ -36,6 +36,6 @@ try {
     echo json_encode(['ok' => true]);
 } catch (PDOException $e) {
     http_response_code(500);
-    echo json_encode(['error' => 'DB delete failed: '.$e->getMessage()]);
+    echo json_encode(['error' => 'DB delete failed: ' . $e->getMessage()]);
     exit;
 }

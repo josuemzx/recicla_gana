@@ -1,3 +1,4 @@
+# render.yaml
 services:
   - type: web
     name: recicla-gana
@@ -6,21 +7,15 @@ services:
     region: oregon
     dockerfilePath: Dockerfile
     envVars:
-      # HOST / PORT desde la DB de Render (propiedad host y port)
       - key: DB_HOST
         fromDatabase:
           name: ecodata
-          property: host
-      - key: DB_PORT
+      - key: DB_PORT                # << aquí!
         fromDatabase:
           name: ecodata
           property: port
-
-      # Nombre fijo de la BD
       - key: DB_NAME
         value: ecodata
-
-      # USER / PASS desde la DB de Render (propiedades user y password)
       - key: DB_USER
         fromDatabase:
           name: ecodata

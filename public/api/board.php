@@ -21,6 +21,6 @@ try {
     echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC));
 } catch (PDOException $e) {
     http_response_code(500);
-    echo json_encode(['error' => 'DB read failed: '.$e->getMessage()]);
+    echo json_encode(['error' => 'DB read failed: ' . $e->getMessage()]);
     exit;
 }
