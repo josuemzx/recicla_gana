@@ -1,40 +1,34 @@
 <?php
-// 1) No mostrar warnings/notices en la salida JSON
-ini_set('display_errors', 0);
-error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING);
+// 1) Mostrar errores para depurar
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
 
-// 2) Cabeceras y CORS
+// 2) Cabeceras JSON + CORS
 header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type');
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    exit; // respuesta al preflight
-}
 
-// 3) Leer credenciales desde entorno (Render o tus DB_*)
-$host     = getenv('MYSQL_HOST')     ?: getenv('DB_HOST')     ?: 'localhost';
-$port     = getenv('MYSQL_PORT')     ?: '3306';
-$dbname   = getenv('MYSQL_DATABASE') ?: getenv('DB_NAME')     ?: 'ecodata';
-$user     = getenv('MYSQL_USER')     ?: getenv('DB_USER')     ?: 'root';
-$password = getenv('MYSQL_PASSWORD') ?: getenv('DB_PASS')     ?: '';
+// 3) Leer credenciales desde entorno
+$host = getenv('DB_HOST') ?: 'localhost';
+$port = getenv('DB_PORT') ?: '3306';
+$db   = getenv('DB_NAME') ?: 'ecodata';
+$user = getenv('DB_USER') ?: 'root';
+$pass = getenv('DB_PASS') ?: '';
 
-// 4) Conectar con PDO
-$dsn = "mysql:host={$host};port={$port};dbname={$dbname};charset=utf8mb4";
 try {
+    // 4) Conexión PDO con puerto
     $pdo = new PDO(
-        $dsn,
+        "mysql:host={$host};port={$port};dbname={$db};charset=utf8mb4",
         $user,
-        $password,
+        $pass,
         [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
     );
 } catch (PDOException $e) {
     http_response_code(500);
-    echo json_encode(['error' => 'DB connection failed']);
+    echo json_encode(['error' => 'DB connection failed: '.$e->getMessage()]);
     exit;
 }
 
-// 5) Leer y decodificar JSON de la petición
+// 5) Leer JSON entrante y validar contraseña
 $in = json_decode(file_get_contents('php://input'), true);
 if (
     !is_array($in) ||
@@ -46,12 +40,11 @@ if (
     exit;
 }
 
-// 6) Sanitizar y preparar datos
 $name    = trim($in['name']);
 $bottles = intval($in['bottles']);
 
-// 7) INSERT … ON DUPLICATE KEY UPDATE
 try {
+    // 6) INSERT / UPDATE
     $stmt = $pdo->prepare("
         INSERT INTO scores (`name`, `bottles`)
         VALUES (?, ?)
@@ -59,22 +52,15 @@ try {
           bottles = bottles + VALUES(bottles)
     ");
     $stmt->execute([$name, $bottles]);
-} catch (PDOException $e) {
-    http_response_code(500);
-    echo json_encode(['error' => 'DB write failed']);
-    exit;
-}
 
-// 8) Leer el total actualizado
-try {
+    // 7) Leer total actualizado
     $stmt  = $pdo->prepare("SELECT bottles FROM scores WHERE `name` = ?");
     $stmt->execute([$name]);
-    $total = (int) $stmt->fetchColumn();
+    $total = (int)$stmt->fetchColumn();
+
+    echo json_encode(['total' => $total]);
 } catch (PDOException $e) {
     http_response_code(500);
-    echo json_encode(['error' => 'DB read failed']);
+    echo json_encode(['error' => 'DB write/read failed: '.$e->getMessage()]);
     exit;
 }
-
-// 9) Devolver resultado limpio en JSON
-echo json_encode(['total' => $total]);

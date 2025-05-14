@@ -189,6 +189,7 @@
 <body>
     <h1>Recicla & Gana 🚀</h1>
     <div class="flex">
+        <!-- PANEL ADMIN -->
         <div class="glass" style="flex:1 1 350px; min-width:300px;">
             <h2 style="text-align:center; text-transform:uppercase; margin-top:0;">Panel Admin</h2>
             <label>Nombre del participante</label>
@@ -198,6 +199,7 @@
             <button id="add">💾 Guardar / Actualizar</button>
             <div id="msg"></div>
         </div>
+        <!-- RANKING Y RECOMPENSAS -->
         <div class="glass" style="flex:2 1 500px; min-width:300px; overflow:auto; max-height:80vh;">
             <h2 style="text-align:center; text-transform:uppercase; margin-top:0;">Ranking</h2>
             <table id="board">
@@ -226,6 +228,7 @@
             </div>
         </div>
     </div>
+
     <script>
         const API_BASE = 'api/';
         const ADMIN_PASS = 'eco123';
@@ -262,7 +265,7 @@
         }];
         const trophies = ['🥇', '🥈', '🥉'];
 
-        // Poblamos SELECT solo con los valores fijos de REWARD_TIERS
+        // **1.** Poblamos el SELECT sólo con los hitos de recompensa
         const sel = document.getElementById('bottles');
         REWARD_TIERS.forEach(r => {
             const o = document.createElement('option');
@@ -271,13 +274,14 @@
             sel.appendChild(o);
         });
 
+        // Helper para llamadas al API
         async function api(url, opts = {}) {
             const res = await fetch(API_BASE + url, opts);
             if (!res.ok) throw new Error(await res.text());
             return res.json();
         }
 
-        // Cargar ranking
+        // Render del ranking
         const tbody = document.querySelector('#board tbody');
 
         function rewardsCount(b) {
@@ -289,18 +293,18 @@
             list.forEach((row, idx) => {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-          <td class="trophy">${trophies[idx]||idx+1}</td>
-          <td>${row.name}</td>
-          <td>${row.bottles}</td>
-          <td>${rewardsCount(row.bottles)}</td>
-          <td><button class="del-btn" data-name="${row.name}">✖</button></td>
-        `;
+                    <td class="trophy">${trophies[idx] || idx + 1}</td>
+                    <td>${row.name}</td>
+                    <td>${row.bottles}</td>
+                    <td>${rewardsCount(row.bottles)}</td>
+                    <td><button class="del-btn" data-name="${row.name}">✖</button></td>
+                `;
                 tbody.appendChild(tr);
             });
         }
         loadBoard();
 
-        // Guardar / Actualizar
+        // Guardar o actualizar un participante
         document.getElementById('add').onclick = async() => {
             const name = document.getElementById('name').value.trim();
             const bottles = parseInt(sel.value, 10);
@@ -329,7 +333,7 @@
             }
         };
 
-        // Eliminar registro
+        // Eliminar un registro
         tbody.addEventListener('click', async e => {
             if (e.target.matches('.del-btn')) {
                 const nm = e.target.dataset.name;
@@ -348,7 +352,7 @@
             }
         });
 
-        // Poblado de detalle de recompensas
+        // Poblado del detalle de recompensas fijo
         const rb = document.getElementById('rewards-body');
         REWARD_TIERS.forEach(r => {
             const tr = document.createElement('tr');
